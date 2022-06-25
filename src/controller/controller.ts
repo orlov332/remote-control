@@ -1,6 +1,7 @@
 import { Readable, Writable } from 'stream';
 import mouseService from '../service/MouseService';
 import { WebSocket } from 'ws';
+import drawService from '../service/DrawService';
 
 export async function processCommand(inputStream: Readable, outputStream: Writable, ws: WebSocket) {
   for await (const input of inputStream) {
@@ -25,6 +26,15 @@ export async function processCommand(inputStream: Readable, outputStream: Writab
         // outputStream.write(`mouse_position ${x},${y}\0`);
         // Readable.from(`mouse_position ${x},${y}\0`, { encoding: 'utf8', objectMode: true }).pipe(outputStream);
         ws.send(`mouse_position ${x},${y}\0`);
+        break;
+      case 'draw_circle':
+        drawService.circle(Number(first));
+        break;
+      case 'draw_rectangle':
+        drawService.rectangle(Number(first), Number(second));
+        break;
+      case 'draw_square':
+        drawService.square(Number(first));
         break;
       case '':
         break;

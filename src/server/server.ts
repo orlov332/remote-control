@@ -7,9 +7,9 @@ export function startServer(port: number) {
   });
 
   wss.on('connection', async (ws) => {
-    const wsStream = createWebSocketStream(ws, { encoding: 'utf8' });
     ws.on('error', (e) => console.error('Server error: ', e));
 
-    await processCommand(wsStream, wsStream);
+    const wsStream = createWebSocketStream(ws, { encoding: 'utf8', decodeStrings: true });
+    await processCommand(wsStream, wsStream, ws);
   });
 }

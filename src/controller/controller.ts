@@ -2,6 +2,7 @@ import { Readable, Writable } from 'stream';
 import mouseService from '../service/MouseService';
 import { WebSocket } from 'ws';
 import drawService from '../service/DrawService';
+import printScreenService from '../service/PrintScreenService';
 
 export async function processCommand(inputStream: Readable, outputStream: Writable, ws: WebSocket) {
   for await (const input of inputStream) {
@@ -22,7 +23,7 @@ export async function processCommand(inputStream: Readable, outputStream: Writab
         await mouseService.goRight(Number(first));
         break;
       case 'mouse_position':
-        const { x, y } = await mouseService.getPosition();
+        const { x, y } = mouseService.getPosition();
         // outputStream.write(`mouse_position ${x},${y}\0`);
         // Readable.from(`mouse_position ${x},${y}\0`, { encoding: 'utf8', objectMode: true }).pipe(outputStream);
         ws.send(`mouse_position ${x},${y}\0`);
@@ -36,7 +37,9 @@ export async function processCommand(inputStream: Readable, outputStream: Writab
       case 'draw_square':
         drawService.square(Number(first));
         break;
-      case '':
+      case 'prnt_scrn':
+        const img = await printScreenService.captureSquare();
+        ws.send(`prnt_scrn ${img}\0`);
         break;
     }
   }

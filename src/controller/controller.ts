@@ -1,12 +1,13 @@
 import { Readable, Writable } from 'stream';
 import mouseService from '../service/MouseService';
-import { WebSocket } from 'ws';
 import drawService from '../service/DrawService';
 import printScreenService from '../service/PrintScreenService';
 
-export async function processCommand(inputStream: Readable, outputStream: Writable, ws: WebSocket) {
+export async function processCommand(inputStream: Readable, outputStream: Writable) {
   for await (const input of inputStream) {
     console.log('Input command: ', input);
+
+    let output = input; // echo by default
 
     const [command, first, second] = input.split(' ');
     switch (command) {
@@ -24,9 +25,7 @@ export async function processCommand(inputStream: Readable, outputStream: Writab
         break;
       case 'mouse_position':
         const { x, y } = mouseService.getPosition();
-        // outputStream.write(`mouse_position ${x},${y}\0`);
-        // Readable.from(`mouse_position ${x},${y}\0`, { encoding: 'utf8', objectMode: true }).pipe(outputStream);
-        ws.send(`mouse_position ${x},${y}\0`);
+        output = `mouse_position ${x},${y}\0`;
         break;
       case 'draw_circle':
         drawService.circle(Number(first));
@@ -39,8 +38,13 @@ export async function processCommand(inputStream: Readable, outputStream: Writab
         break;
       case 'prnt_scrn':
         const img = await printScreenService.captureSquare();
-        ws.send(`prnt_scrn ${img}\0`);
+        output = `prnt_scrn ${img}\0`;
         break;
+      default:
+        console.warn(`Unsupported command: ${command}`);
     }
+
+    console.log('Response: ', output);
+    Readable.from(output, { encoding: 'utf8' }).pipe(outputStream, { end: false });
   }
 }

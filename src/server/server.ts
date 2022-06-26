@@ -8,9 +8,11 @@ export function startServer(port: number) {
 
   wss.on('connection', async (ws) => {
     ws.on('error', (e) => console.error('Server error: ', e));
-    ws.on('send', (s) => console.log('Server response: ', s));
+    ws.on('close', () => console.log('Client disconnected'));
 
     const wsStream = createWebSocketStream(ws, { encoding: 'utf8', decodeStrings: false });
     await processCommand(wsStream, wsStream);
   });
+
+  return wss;
 }

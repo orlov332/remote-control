@@ -4,7 +4,10 @@
   "description": "",
   "main": "./src/app.ts",
   "scripts": {
-    "start:dev": "ts-node-dev ./src/app.ts"
+    "build": "tsc -p .",
+    "start:dev": "ts-node-dev ./src/app.ts",
+    "start:prod": "node ./dist/app.js",
+    "prestart:prod": "npm run build"
   },
   "keywords": [],
   "author": "",
